@@ -1,0 +1,33 @@
+name: job outputs definition
+on:
+  push:
+
+jobs:
+  env:
+    runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.set_flags.outputs.branch }}
+      doBuild: ${{ steps.set_flags.outputs.build }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: set_flags
+        run: |
+          echo "::set-output name=branch::${GITHUB_REF##*/}"
+          echo "::set-output name=build::true"
+      - name: echo flags
+        run: |
+          echo "branch  : ${{ steps.set_flags.outputs.branch }}"
+
+
+  build:
+    runs-on: ubuntu-latest
+    needs: env
+    if: needs.env.outputs.doBuild == 'true'
+    outputs:
+      version: ${{ steps.build1.outputs.version }}
+    steps:
+      - name: echo needs outputs
+        id: build1
+        run: |
+          echo "::set-output name=version::42"
+          echo "test3: ${{ needs.env.outputs.doBuild }}"
